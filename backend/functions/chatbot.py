@@ -7,7 +7,7 @@ import requests
 
 # Read Environment Vars (Netlify dashboard)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-HOTEL_API_ENDPOINT = os.getenv("HOTEL_API_ENDPOINT")
+HOTEL_API_ENDPOINT = "https://hotel.dev-maister.gr/hotel_Casa/mcp_server/index.php"
 HOTEL_API_BEARER_TOKEN = os.getenv("HOTEL_API_BEARER_TOKEN")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
