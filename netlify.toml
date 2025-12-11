@@ -1,10 +1,10 @@
 [build]
   functions = "functions"
+  command = "npm install"
 
 [functions]
-  directory = "functions"
   node_bundler = "esbuild"
+  external_node_modules = ["node-fetch", "openai"]
 
-[functions."chatbot"]
-  included_files = ["functions/chatbot.py"]
-  timeout = 30
+[build.environment]
+  NODE_VERSION = "22"
