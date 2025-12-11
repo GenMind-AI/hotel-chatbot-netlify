@@ -8,3 +8,6 @@
 [functions."chatbot"]
   included_files = ["functions/chatbot.py"]
   timeout = 30
+
+[build.environment]
+  NODE_VERSION = "20"
