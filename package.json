@@ -1,0 +1,8 @@
+{
+  "name": "hotel-chatbot",
+  "version": "1.0.0",
+  "dependencies": {
+    "node-fetch": "^3.4.0",
+    "openai": "^4.34.0"
+  }
+}
