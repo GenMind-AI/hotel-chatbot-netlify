@@ -13,22 +13,22 @@ const HOTEL_API_ENDPOINT = "https://hotel.dev-maister.gr/hotel_Casa/mcp_server/i
 const HOTEL_API_BEARER_TOKEN = process.env.HOTEL_API_BEARER_TOKEN;
 
 // --- Helper functions ---
-async function getHotelAvailability({ json_key, start, end, adults, kids, minors }) {
+async function getHotelAvailability({ start, end, adults, kids, minors }) {
   const headers = {
     Authorization: `Bearer ${HOTEL_API_BEARER_TOKEN}`,
     Accept: "*/*",
     "User-Agent": "Node.js"
   };
-  //const params = new URLSearchParams({ json_key, start, end, adults, kids, minors });
-  // Hardcode json_key as "availability"
+
   const params = new URLSearchParams({ 
-    json_key: "availability", 
+    json_key: "availability", // hardcoded
     start, 
     end, 
     adults, 
     kids, 
     minors 
   });
+
   try {
     const res = await fetch(`${HOTEL_API_ENDPOINT}?${params.toString()}`, { headers });
     return await res.json();
@@ -37,22 +37,22 @@ async function getHotelAvailability({ json_key, start, end, adults, kids, minors
   }
 }
 
-async function getHotelPrice({ json_key, start, end, adults, kids, minors }) {
+async function getHotelPrice({ start, end, adults, kids, minors }) {
   const headers = {
     Authorization: `Bearer ${HOTEL_API_BEARER_TOKEN}`,
     Accept: "*/*",
     "User-Agent": "Node.js"
   };
-  //const params = new URLSearchParams({ json_key, start, end, adults, kids, minors });
-  // Hardcode json_key as "availability"
+
   const params = new URLSearchParams({ 
-    json_key: "price", 
+    json_key: "price", // hardcoded
     start, 
     end, 
     adults, 
     kids, 
     minors 
   });
+
   try {
     const res = await fetch(`${HOTEL_API_ENDPOINT}?${params.toString()}`, { headers });
     return await res.json();
@@ -145,6 +145,7 @@ exports.handler = async function(event, context) {
       const args = JSON.parse(argsStr || "{}");
       let result;
 
+      // Ignore json_key passed by GPT; always send correct key
       if (name === "getHotelAvailability") result = await getHotelAvailability(args);
       else if (name === "getHotelPrice") result = await getHotelPrice(args);
       else result = { error: "Unknown function call" };
