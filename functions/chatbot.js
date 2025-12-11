@@ -20,8 +20,7 @@ async function getHotelAvailability({ json_key, start, end, adults, kids, minors
   const params = new URLSearchParams({ json_key, start, end, adults, kids, minors });
   try {
     const res = await fetch(`${HOTEL_API_ENDPOINT}?${params.toString()}`, { headers });
-    const data = await res.json();
-    return data;
+    return await res.json();
   } catch (err) {
     return { error: "API call failed", details: err.message };
   }
@@ -36,8 +35,7 @@ async function getHotelPrice({ json_key, start, end, adults, kids, minors }) {
   const params = new URLSearchParams({ json_key, start, end, adults, kids, minors });
   try {
     const res = await fetch(`${HOTEL_API_ENDPOINT}?${params.toString()}`, { headers });
-    const data = await res.json();
-    return data;
+    return await res.json();
   } catch (err) {
     return { error: "API call failed", details: err.message };
   }
@@ -45,10 +43,23 @@ async function getHotelPrice({ json_key, start, end, adults, kids, minors }) {
 
 // --- Netlify function handler ---
 exports.handler = async function(event, context) {
+  // --- Handle preflight CORS OPTIONS request ---
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "POST, OPTIONS"
+      },
+      body: ""
+    };
+  }
+
   try {
     const body = JSON.parse(event.body || "{}");
     const userMessage = body.message || "";
-    const conversation = body.messages || []; // optional conversation memory
+    const conversation = body.messages || []; // optional conversation context
 
     // --- System prompt ---
     const systemPrompt = `
@@ -138,7 +149,7 @@ exports.handler = async function(event, context) {
       aiMsg = finalGpt.choices[0].message;
     }
 
-    // --- Return response to frontend ---
+    // --- Successful response with CORS headers ---
     return {
       statusCode: 200,
       headers: {
@@ -152,9 +163,13 @@ exports.handler = async function(event, context) {
     };
 
   } catch (err) {
+    // --- Error response with CORS headers ---
     return {
       statusCode: 500,
-      headers: { "Access-Control-Allow-Origin": "*" },
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type"
+      },
       body: JSON.stringify({ error: err.message })
     };
   }
