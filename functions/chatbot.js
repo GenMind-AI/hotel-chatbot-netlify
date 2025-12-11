@@ -102,7 +102,6 @@ exports.handler = async function(event, context) {
         parameters: {
           type: "object",
           properties: {
-            json_key: { type: "string" },
             start: { type: "string" },
             end: { type: "string" },
             adults: { type: "string" },
@@ -118,7 +117,6 @@ exports.handler = async function(event, context) {
         parameters: {
           type: "object",
           properties: {
-            json_key: { type: "string" },
             start: { type: "string" },
             end: { type: "string" },
             adults: { type: "string" },
