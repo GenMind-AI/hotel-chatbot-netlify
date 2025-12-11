@@ -1,16 +1,18 @@
-const fetch = require("node-fetch");
+// chatbot.js - Netlify Function
+
+const fetch = require("node-fetch"); // Node-fetch v2
 const OpenAI = require("openai");
 
-// --- Setup OpenAI client ---
+// --- OpenAI client ---
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// --- Setup Hotel API ---
+// --- Hotel API ---
 const HOTEL_API_ENDPOINT = "https://hotel.dev-maister.gr/hotel_Casa/mcp_server/index.php";
 const HOTEL_API_BEARER_TOKEN = process.env.HOTEL_API_BEARER_TOKEN;
 
-// --- Helper functions for hotel API calls ---
+// --- Helper functions ---
 async function getHotelAvailability({ json_key, start, end, adults, kids, minors }) {
   const headers = {
     Authorization: `Bearer ${HOTEL_API_BEARER_TOKEN}`,
@@ -41,9 +43,9 @@ async function getHotelPrice({ json_key, start, end, adults, kids, minors }) {
   }
 }
 
-// --- Netlify function handler ---
+// --- Netlify handler ---
 exports.handler = async function(event, context) {
-  // --- Handle preflight CORS OPTIONS request ---
+  // --- CORS preflight ---
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 204,
@@ -59,9 +61,8 @@ exports.handler = async function(event, context) {
   try {
     const body = JSON.parse(event.body || "{}");
     const userMessage = body.message || "";
-    const conversation = body.messages || []; // optional conversation context
+    const conversation = body.messages || [];
 
-    // --- System prompt ---
     const systemPrompt = `
       You are a hotel reception assistant for Hotel Ilion.
       You can chat naturally with the user, ask clarifying questions, and only call 
@@ -70,14 +71,12 @@ exports.handler = async function(event, context) {
       Always clarify ages of children.
     `;
 
-    // --- Messages for GPT ---
     const messages = [
       { role: "system", content: systemPrompt },
       ...conversation,
       { role: "user", content: userMessage }
     ];
 
-    // --- GPT call with function definitions ---
     const tools = [
       {
         name: "getHotelAvailability",
@@ -113,6 +112,7 @@ exports.handler = async function(event, context) {
       }
     ];
 
+    // --- GPT Call ---
     const gptResponse = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages,
@@ -122,21 +122,15 @@ exports.handler = async function(event, context) {
 
     let aiMsg = gptResponse.choices[0].message;
 
-    // --- Handle function calls ---
     if (aiMsg.function_call) {
       const { name, arguments: argsStr } = aiMsg.function_call;
       const args = JSON.parse(argsStr || "{}");
       let result;
 
-      if (name === "getHotelAvailability") {
-        result = await getHotelAvailability(args);
-      } else if (name === "getHotelPrice") {
-        result = await getHotelPrice(args);
-      } else {
-        result = { error: "Unknown function call" };
-      }
+      if (name === "getHotelAvailability") result = await getHotelAvailability(args);
+      else if (name === "getHotelPrice") result = await getHotelPrice(args);
+      else result = { error: "Unknown function call" };
 
-      // Append function response and get final GPT reply
       messages.push({ role: "assistant", content: null, function_call: aiMsg.function_call });
       messages.push({ role: "function", name, content: JSON.stringify(result) });
 
@@ -149,21 +143,17 @@ exports.handler = async function(event, context) {
       aiMsg = finalGpt.choices[0].message;
     }
 
-    // --- Successful response with CORS headers ---
+    // --- Success response with CORS ---
     return {
       statusCode: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "Content-Type"
       },
-      body: JSON.stringify({
-        response: aiMsg.content || "Hello! How can I assist you?",
-        messages
-      })
+      body: JSON.stringify({ response: aiMsg.content || "Hello!", messages })
     };
 
   } catch (err) {
-    // --- Error response with CORS headers ---
     return {
       statusCode: 500,
       headers: {
