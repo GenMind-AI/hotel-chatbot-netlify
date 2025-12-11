@@ -19,7 +19,16 @@ async function getHotelAvailability({ json_key, start, end, adults, kids, minors
     Accept: "*/*",
     "User-Agent": "Node.js"
   };
-  const params = new URLSearchParams({ json_key, start, end, adults, kids, minors });
+  //const params = new URLSearchParams({ json_key, start, end, adults, kids, minors });
+  // Hardcode json_key as "availability"
+  const params = new URLSearchParams({ 
+    json_key: "availability", 
+    start, 
+    end, 
+    adults, 
+    kids, 
+    minors 
+  });
   try {
     const res = await fetch(`${HOTEL_API_ENDPOINT}?${params.toString()}`, { headers });
     return await res.json();
@@ -34,7 +43,16 @@ async function getHotelPrice({ json_key, start, end, adults, kids, minors }) {
     Accept: "*/*",
     "User-Agent": "Node.js"
   };
-  const params = new URLSearchParams({ json_key, start, end, adults, kids, minors });
+  //const params = new URLSearchParams({ json_key, start, end, adults, kids, minors });
+  // Hardcode json_key as "availability"
+  const params = new URLSearchParams({ 
+    json_key: "price", 
+    start, 
+    end, 
+    adults, 
+    kids, 
+    minors 
+  });
   try {
     const res = await fetch(`${HOTEL_API_ENDPOINT}?${params.toString()}`, { headers });
     return await res.json();
