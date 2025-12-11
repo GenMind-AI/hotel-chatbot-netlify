@@ -1,0 +1,10 @@
+[build]
+  functions = "functions"
+
+[functions]
+  directory = "functions"
+  node_bundler = "esbuild"
+
+[functions."chatbot"]
+  included_files = ["functions/chatbot.py"]
+  timeout = 30
